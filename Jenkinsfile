@@ -41,6 +41,7 @@ pipeline {
     }
 
     stage('Deploy to Kubernetes (Helm)') {
+      when { expression { return false } }
       steps {
         withCredentials([
           file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG'),
