@@ -17,6 +17,17 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Check DOCKERHUB_TOKEN presence
+        run: |
+          if [ -z "${DOCKERHUB_TOKEN}" ]; then
+            echo "DOCKERHUB_TOKEN is missing (Repository secret not set)";
+            exit 1;
+          else
+            echo "Token present";
+          fi
+        env:
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
