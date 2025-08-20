@@ -4,12 +4,13 @@
 FROM node:20 AS build
 WORKDIR /app
 COPY package.json package-lock.json* ./
-# Ensure correct platform-specific binaries (e.g., esbuild) inside Linux container
+# Ensure dev deps (vite) are installed for build
 RUN npm ci --include=dev || npm install
 COPY . .
-# Rebuild native/PNPM-optional binaries that may be wrong for this platform
-RUN npm rebuild esbuild || true \
-  && npm run build
+# Ensure Vite binary is executable and build using npx
+RUN chmod +x node_modules/.bin/vite || true \
+  && chmod +x node_modules/vite/bin/vite.js || true \
+  && npx vite build
 
 # ---------- Production stage (static files) ----------
 FROM nginx:alpine AS prod
