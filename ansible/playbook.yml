@@ -1,0 +1,55 @@
+---
+- name: Deploy monitoring app to Minikube
+  hosts: localhost
+  gather_facts: false
+  collections:
+    - kubernetes.core
+
+  vars:
+    kubeconfig: "{{ lookup('env', 'KUBECONFIG') | default('~/.kube/config', true) }}"
+
+  tasks:
+    - name: Ensure namespace exists
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig }}"
+        api_version: v1
+        kind: Namespace
+        name: "{{ namespace }}"
+        state: present
+
+    - name: Create/Update Yelp API Secret
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig }}"
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: monitoring-app-secrets
+            namespace: "{{ namespace }}"
+          type: Opaque
+          stringData:
+            yelp-api-key: "{{ yelp_api_key }}"
+
+    - name: Install/Upgrade Helm chart
+      kubernetes.core.helm:
+        kubeconfig: "{{ kubeconfig }}"
+        name: "{{ release_name }}"
+        chart_ref: "{{ chart_path }}"
+        release_namespace: "{{ namespace }}"
+        state: present
+        values:
+          image:
+            server:
+              repository: "{{ image_server_repository }}"
+              tag: latest
+            web:
+              repository: "{{ image_web_repository }}"
+              tag: latest
+          server:
+            env:
+              - name: PORT
+                value: "3001"
+          ingress:
+            enabled: false
+

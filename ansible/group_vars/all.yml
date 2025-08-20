@@ -1,0 +1,11 @@
+namespace: monitoring-app
+chart_path: ../charts/monitoring-app
+release_name: monitoring-app
+
+# Set your pushed image repositories
+image_server_repository: "your-dockerhub-username/monitoring-server"
+image_web_repository: "your-dockerhub-username/monitoring-web"
+
+# Provide your Yelp API key via extra vars or env
+yelp_api_key: ""
+

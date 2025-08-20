@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "monitoring-app.fullname" . }}-server
+  labels:
+    app.kubernetes.io/name: {{ include "monitoring-app.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: server
+spec:
+  replicas: {{ .Values.server.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "monitoring-app.name" . }}
+      app.kubernetes.io/component: server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "monitoring-app.name" . }}
+        app.kubernetes.io/component: server
+    spec:
+      containers:
+        - name: server
+          image: "{{ .Values.image.server.repository }}:{{ .Values.image.server.tag }}"
+          imagePullPolicy: {{ .Values.image.server.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.server.port }}
+          env:
+{{- range .Values.server.env }}
+            - name: {{ .name }}
+              value: "{{ .value }}"
+{{- end }}
+            - name: YELP_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "monitoring-app.fullname" . }}-secrets
+                  key: {{ (index .Values.server.secretEnv 0).key | default "yelp-api-key" }}
+          resources:
+{{ toYaml .Values.server.resources | indent 12 }}
+

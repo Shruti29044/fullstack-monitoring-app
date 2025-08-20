@@ -1,0 +1,21 @@
+groups:
+  - name: api-alerts
+    rules:
+      - alert: ApiDown
+        expr: up{job="monitoring-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API is down"
+          description: "No scrape target is up for monitoring-api for more than 1 minute."
+
+      - alert: HighRequestLatencyP95
+        expr: histogram_quantile(0.95, sum by (le) (rate(api_request_duration_seconds_bucket[5m]))) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p95 request latency"
+          description: "The 95th percentile request latency is above 2s for 5 minutes."
+

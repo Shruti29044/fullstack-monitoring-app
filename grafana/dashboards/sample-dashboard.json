@@ -1,0 +1,115 @@
+{
+  "annotations": {"list": []},
+  "panels": [
+    {
+      "type": "stat",
+      "title": "API UP",
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "up{job=\"monitoring-api\"}", "legendFormat": "api"}
+      ],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "type": "timeseries",
+      "title": "RPS (requests/sec)",
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "sum(rate(api_request_duration_seconds_count[5m]))", "legendFormat": "rps"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Request duration p95",
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum by (le) (rate(api_request_duration_seconds_bucket[5m])))", "legendFormat": "p95"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "p95 Latency by route",
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum by (le, route) (rate(api_request_duration_seconds_bucket[5m])))", "legendFormat": "{{route}}"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error rate (5xx) by route",
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "sum by (route) (rate(api_request_duration_seconds_count{status=~\"5..\"}[5m]))", "legendFormat": "{{route}}"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU (user seconds/sec)",
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "rate(process_cpu_user_seconds_total{job=\"monitoring-api\"}[5m])", "legendFormat": "cpu"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory (RSS bytes)",
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "process_resident_memory_bytes{job=\"monitoring-api\"}", "legendFormat": "rss"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Event loop lag (s)",
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "nodejs_eventloop_lag_seconds{job=\"monitoring-api\"}", "legendFormat": "lag"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "RPS by route (yelp_*)",
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "sum by (route) (rate(api_request_duration_seconds_count{route=~\"^yelp_.*\"}[5m]))", "legendFormat": "{{route}}"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "p95 by route (contains 'business')",
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum by (le, route) (rate(api_request_duration_seconds_bucket{route=~\".*business.*\"}[5m])))", "legendFormat": "{{route}}"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "5xx error rate (overall)",
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "sum(rate(api_request_duration_seconds_count{status=~\"5..\"}[5m]))", "legendFormat": "5xx"}
+      ]
+    },
+    {
+      "type": "heatmap",
+      "title": "Duration buckets (rate)",
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "sum by (le) (rate(api_request_duration_seconds_bucket[5m]))", "legendFormat": "le={{le}}"}
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Jobs starting with x (UP)",
+      "datasource": {"type": "prometheus", "uid": "Prometheus"},
+      "targets": [
+        {"expr": "up{job=~\"^x.*\"}"}
+      ],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    }
+  ],
+  "title": "Monitoring Sample",
+  "schemaVersion": 38,
+  "version": 3
+}
+

@@ -1,0 +1,8 @@
+route:
+  receiver: stdout
+
+receivers:
+  - name: stdout
+    webhook_configs:
+      - url: http://127.0.0.1:1  # no-op sink; replace with Slack/PagerDuty later
+
